@@ -1,0 +1,24 @@
+Properties readRootProperties() {
+    def props = new Properties()
+    def rootGradlePropertiesFile = new File("${rootDir.parentFile}/gradle.properties")
+    if (rootGradlePropertiesFile.exists()) {
+        rootGradlePropertiesFile.withInputStream {
+            props.load(it)
+        }
+    }
+    return props
+}
+
+readRootProperties().each {
+    project.ext.set(it.key.toString(), it.value)
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation libs.guava
+    implementation libs.jsch
+}

@@ -1,0 +1,30 @@
+package gr.utils.task
+
+import gr.utils.ProcessUtils
+import gr.utils.ShellRunner
+import gr.utils.shell.ShellRunnerImpl
+import gr.utils.spec.ServiceSpec
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.TaskAction
+
+abstract class UpServiceTask extends DefaultTask {
+
+    private static ShellRunner shellRunner = ShellRunnerImpl.INSTANCE
+
+    @Input
+    abstract ServiceSpec service
+
+    @TaskAction
+    void execute() {
+        if (service.imageFullPath != null) {
+            if (ProcessUtils.hasActiveProcess(logger, service.imageFullPath)) {
+                logger.lifecycle("${service.name} UP")
+                return
+            }
+        }
+        shellRunner.run(logger, service.upCommand)
+        logger.lifecycle("${service.name} UP")
+    }
+
+}

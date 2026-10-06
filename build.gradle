@@ -1,0 +1,72 @@
+import gr.utils.plugin.InfraPlugin
+import gr.utils.task.SshTask
+
+Properties props = new Properties()
+new File("$project.rootDir/local.properties").withInputStream {
+    props.load(it)
+}
+props.each {
+    project.ext[it.key as String] = it.value
+}
+
+apply(plugin: InfraPlugin)
+
+infra {
+    char sep = File.separatorChar
+
+    service {
+        name "seaweed"
+        upCommand {
+            workDir seaweedPath
+            command "weed mini -dir=data"
+            env "AWS_ACCESS_KEY_ID", "admin"
+            env "AWS_SECRET_ACCESS_KEY", "secret"
+            env "S3_BUCKET", "s3-bucket"
+            detachAfterPhrase "All enabled components are running and ready to use"
+            timeoutSeconds 60
+        }
+        imageFullPath seaweedPath + seaweedExe
+    }
+
+    service {
+        name "postgres"
+        upCommand {
+            workDir postgresPath
+            command ".${sep}bin${sep}pg_ctl start -D data -l postgres.txt"
+            timeoutSeconds 60
+        }
+        imageFullPath postgresExe
+        downCommand {
+            workDir postgresPath
+            command ".${sep}bin${sep}pg_ctl stop -D data"
+            timeoutSeconds 60
+        }
+        healthcheck {
+            command {
+                workDir postgresPath
+                command ".${sep}bin${sep}pg_isready -h localhost -d postgres -U postgres"
+                timeoutSeconds 60
+            }
+            intervalSeconds 2
+            timeoutSeconds 60
+        }
+    }
+
+    def remoteHost = remote {
+        host sshHost
+        port sshPort
+        user sshUser
+        password sshPassword
+    }
+
+    tasks.register('checkRemote', SshTask) {
+        group = 'remote'
+        remote = remoteHost
+        commands = [
+            'echo -- Docker && sudo docker ps --format "table {{.ID}}\\t{{.Names}}\\t{{.Status}}"',
+            'echo -- Disk && sudo df -h --output=source,avail,pcent',
+            'echo -- RAM && free -h',
+            'echo -- CPU && mpstat'
+        ]
+    }
+}
