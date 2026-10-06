@@ -115,8 +115,7 @@ class ShellRunnerImpl implements ShellRunner {
         List<String> cmd = new ArrayList<>()
 
         if (isWindows) {
-            cmd.add("cmd")
-            cmd.add("/C")
+            cmd.add("powershell")
             cmd.add(spec.command)
         } else {
             // setsid делает дочерний процесс лидером новой process group,

@@ -12,16 +12,16 @@ props.each {
 apply(plugin: InfraPlugin)
 
 infra {
-    char sep = File.separatorChar
-
     service {
         name "seaweed"
         upCommand {
             workDir seaweedPath
-            command "weed mini -dir=data"
-            env "AWS_ACCESS_KEY_ID", "admin"
-            env "AWS_SECRET_ACCESS_KEY", "secret"
-            env "S3_BUCKET", "s3-bucket"
+            command "./weed mini -dir=data"
+            env([
+                AWS_ACCESS_KEY_ID: "admin",
+                AWS_SECRET_ACCESS_KEY: "secret",
+                S3_BUCKET: "s3-bucket"
+            ])
             detachAfterPhrase "All enabled components are running and ready to use"
             timeoutSeconds 60
         }
@@ -32,19 +32,19 @@ infra {
         name "postgres"
         upCommand {
             workDir postgresPath
-            command ".${sep}bin${sep}pg_ctl start -D data -l postgres.txt"
+            command "./bin/pg_ctl start -D data -l postgres.txt"
             timeoutSeconds 60
         }
         imageFullPath postgresExe
         downCommand {
             workDir postgresPath
-            command ".${sep}bin${sep}pg_ctl stop -D data"
+            command "./bin/pg_ctl stop -D data"
             timeoutSeconds 60
         }
         healthcheck {
             command {
                 workDir postgresPath
-                command ".${sep}bin${sep}pg_isready -h localhost -d postgres -U postgres"
+                command "./bin/pg_isready -h localhost -d postgres -U postgres"
                 timeoutSeconds 60
             }
             intervalSeconds 2
