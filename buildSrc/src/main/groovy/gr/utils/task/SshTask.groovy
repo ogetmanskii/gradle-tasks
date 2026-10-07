@@ -38,7 +38,7 @@ abstract class SshTask extends DefaultTask {
         }
     }
 
-    private static void runCommand(Session session, String cmd) {
+    void runCommand(Session session, String cmd) {
         ChannelExec channel = session.openChannel('exec') as ChannelExec
         channel.setCommand(cmd)
         channel.setInputStream(null)
@@ -47,12 +47,12 @@ abstract class SshTask extends DefaultTask {
         channel.connect()
         Thread outThread = Thread.start('ssh-stdout') {
             out.withStream { InputStream is ->
-                copyTo(is, System.out)
+                logStream(is)
             }
         }
         Thread errThread = Thread.start('ssh-stderr') {
             errStream.withStream { InputStream is ->
-                copyTo(is, System.err)
+                logStream(is)
             }
         }
         while (!channel.isClosed()) {
@@ -67,12 +67,11 @@ abstract class SshTask extends DefaultTask {
         }
     }
 
-    private static void copyTo(InputStream is, OutputStream os) {
-        byte[] buf = new byte[4096]
-        int n
-        while ((n = is.read(buf)) != -1) {
-            os.write(buf, 0, n)
-            os.flush()
+    void logStream(InputStream is) {
+        Reader reader = new InputStreamReader(is)
+        String line
+        while ((line = reader.readLine()) != null) {
+            logger.lifecycle(line)
         }
     }
 }

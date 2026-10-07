@@ -1,12 +1,13 @@
 import gr.utils.plugin.InfraPlugin
+import gr.utils.task.CleanTempTask
 import gr.utils.task.SshTask
 
 Properties props = new Properties()
 new File("$project.rootDir/local.properties").withInputStream {
     props.load(it)
-}
-props.each {
-    project.ext[it.key as String] = it.value
+    props.each {
+        project.ext[it.key as String] = it.value
+    }
 }
 
 apply(plugin: InfraPlugin)
@@ -69,4 +70,8 @@ infra {
             'echo -- CPU && mpstat'
         ]
     }
+}
+
+tasks.register('cleanTemp', CleanTempTask) {
+    group = 'cleanup'
 }
