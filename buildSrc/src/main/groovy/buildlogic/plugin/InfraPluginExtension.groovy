@@ -1,11 +1,11 @@
-package gr.utils.plugin
+package buildlogic.plugin
 
-import gr.utils.ClosureUtils
-import gr.utils.spec.RemoteHostSpec
-import gr.utils.spec.ServiceSpec
-import gr.utils.task.DownServiceTask
-import gr.utils.task.HealthcheckServiceTask
-import gr.utils.task.UpServiceTask
+import buildlogic.utils.ClosureUtils
+import buildlogic.spec.RemoteHostSpec
+import buildlogic.spec.ServiceSpec
+import buildlogic.task.DownServiceTask
+import buildlogic.task.HealthcheckServiceTask
+import buildlogic.task.UpServiceTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 

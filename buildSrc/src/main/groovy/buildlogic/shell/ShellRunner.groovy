@@ -1,10 +1,10 @@
-package gr.utils
+package buildlogic.shell
 
-import gr.utils.exception.InvalidExitCodeException
-import gr.utils.exception.TimeoutException
-import gr.utils.exception.UnhealthyException
-import gr.utils.spec.CommandSpec
-import gr.utils.spec.HealthcheckSpec
+import buildlogic.exception.InvalidExitCodeException
+import buildlogic.exception.TimeoutException
+import buildlogic.exception.UnhealthyException
+import buildlogic.spec.CommandSpec
+import buildlogic.spec.HealthcheckSpec
 import org.gradle.api.logging.Logger
 
 import javax.annotation.Nullable

@@ -1,4 +1,4 @@
-package gr.utils
+package buildlogic.utils
 
 class ClosureUtils {
     static <T> T applyClosure(Closure closure, T delegate) {

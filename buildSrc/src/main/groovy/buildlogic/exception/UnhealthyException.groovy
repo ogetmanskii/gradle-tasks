@@ -1,4 +1,4 @@
-package gr.utils.exception
+package buildlogic.exception
 
 class UnhealthyException extends RuntimeException {
 

@@ -1,4 +1,4 @@
-package gr.utils
+package buildlogic.utils
 
 import org.gradle.api.logging.Logger
 

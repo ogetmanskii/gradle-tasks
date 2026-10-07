@@ -1,7 +1,7 @@
-package gr.utils.spec
+package buildlogic.spec
 
-import gr.utils.ClosureUtils
-import gr.utils.OsUtils
+import buildlogic.utils.ClosureUtils
+import buildlogic.utils.OsUtils
 import org.apache.commons.lang3.StringUtils
 
 class ServiceSpec {

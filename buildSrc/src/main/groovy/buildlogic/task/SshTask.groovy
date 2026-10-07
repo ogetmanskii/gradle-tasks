@@ -1,9 +1,9 @@
-package gr.utils.task
+package buildlogic.task
 
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
-import gr.utils.spec.RemoteHostSpec
+import buildlogic.spec.RemoteHostSpec
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input

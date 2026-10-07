@@ -1,6 +1,6 @@
-package gr.utils.spec
+package buildlogic.spec
 
-import gr.utils.Validate
+import buildlogic.utils.Validate
 import org.apache.commons.lang3.StringUtils
 
 import javax.annotation.Nullable

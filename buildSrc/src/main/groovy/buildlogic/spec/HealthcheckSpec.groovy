@@ -1,7 +1,7 @@
-package gr.utils.spec
+package buildlogic.spec
 
-import gr.utils.ClosureUtils
-import gr.utils.Validate
+import buildlogic.utils.ClosureUtils
+import buildlogic.utils.Validate
 
 class HealthcheckSpec {
 

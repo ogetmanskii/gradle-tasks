@@ -1,6 +1,6 @@
-import gr.utils.plugin.InfraPlugin
-import gr.utils.task.CleanTempTask
-import gr.utils.task.SshTask
+import buildlogic.plugin.InfraPlugin
+import buildlogic.task.CleanTempTask
+import buildlogic.task.SshTask
 
 apply(plugin: InfraPlugin)
 
@@ -64,8 +64,8 @@ infra {
             'echo -- CPU && mpstat'
         ]
     }
-}
 
-tasks.register('cleanTemp', CleanTempTask) {
-    group = 'cleanup'
+    tasks.register('cleanTemp', CleanTempTask) {
+        group = 'cleanup'
+    }
 }

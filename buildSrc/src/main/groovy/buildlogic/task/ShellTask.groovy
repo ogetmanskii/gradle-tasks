@@ -1,6 +1,6 @@
-package gr.utils.task
+package buildlogic.task
 
-import gr.utils.OsUtils
+import buildlogic.utils.OsUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
@@ -35,7 +35,7 @@ abstract class ShellTask extends DefaultTask {
 
         if (detached) {
             List<String> command = new ArrayList<>();
-            if (OsUtils.isWindows()) {
+            if (OsUtils.IS_WINDOWS) {
                 command.add("powershell")
                 command.add("-Command")
             } else {
@@ -50,8 +50,8 @@ abstract class ShellTask extends DefaultTask {
                 .start()
         } else {
             ExecAction exec = getExecActionFactory().newExecAction()
-            if (OsUtils.isWindows()) {
-                exec.commandLine("cmd", "/C", cmdString)
+            if (OsUtils.IS_WINDOWS) {
+                exec.commandLine("powershell", "-Command", cmdString)
             } else {
                 exec.commandLine("sh", "-c", cmdString)
             }

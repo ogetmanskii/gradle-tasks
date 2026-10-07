@@ -1,4 +1,4 @@
-package gr.utils
+package buildlogic.utils
 
 class Validate {
 

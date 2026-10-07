@@ -1,4 +1,4 @@
-package gr.utils.exception
+package buildlogic.exception
 
 class InvalidExitCodeException extends RuntimeException {
     private final int exitCode;

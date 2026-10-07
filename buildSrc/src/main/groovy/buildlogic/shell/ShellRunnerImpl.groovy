@@ -1,12 +1,11 @@
-package gr.utils.shell
+package buildlogic.shell
 
-import gr.utils.OsUtils
-import gr.utils.exception.InvalidExitCodeException
-import gr.utils.exception.TimeoutException
-import gr.utils.spec.CommandSpec
-import gr.utils.ShellRunner
-import gr.utils.exception.UnhealthyException
-import gr.utils.spec.HealthcheckSpec
+import buildlogic.utils.OsUtils
+import buildlogic.exception.InvalidExitCodeException
+import buildlogic.exception.TimeoutException
+import buildlogic.spec.CommandSpec
+import buildlogic.exception.UnhealthyException
+import buildlogic.spec.HealthcheckSpec
 import org.gradle.api.logging.Logger
 
 import java.nio.charset.StandardCharsets

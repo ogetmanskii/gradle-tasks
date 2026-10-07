@@ -1,8 +1,8 @@
-package gr.utils.task
+package buildlogic.task
 
-import gr.utils.ShellRunner
-import gr.utils.shell.ShellRunnerImpl
-import gr.utils.spec.ServiceSpec
+import buildlogic.shell.ShellRunner
+import buildlogic.shell.ShellRunnerImpl
+import buildlogic.spec.ServiceSpec
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction

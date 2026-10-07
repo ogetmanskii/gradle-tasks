@@ -1,4 +1,4 @@
-package gr.utils.plugin
+package buildlogic.plugin
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
