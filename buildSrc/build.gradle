@@ -1,17 +1,17 @@
-Properties readRootProperties() {
+void loadRootProjectProperties() {
     def props = new Properties()
-    def rootGradlePropertiesFile = new File("${rootDir.parentFile}/gradle.properties")
-    if (rootGradlePropertiesFile.exists()) {
-        rootGradlePropertiesFile.withInputStream {
+    def gradleProperties = new File("${rootDir.parentFile}/gradle.properties")
+    if (gradleProperties.exists()) {
+        gradleProperties.withInputStream {
             props.load(it)
         }
     }
-    return props
+    props.each {
+        project.ext.set(it.key.toString(), it.value)
+    }
 }
 
-readRootProperties().each {
-    project.ext.set(it.key.toString(), it.value)
-}
+loadRootProjectProperties()
 
 repositories {
     mavenCentral()
@@ -19,6 +19,6 @@ repositories {
 }
 
 dependencies {
-    implementation libs.guava
     implementation libs.jsch
+    implementation libs.commonsLang3
 }

@@ -1,5 +1,6 @@
 package gr.utils.task
 
+import gr.utils.OsUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
@@ -34,9 +35,9 @@ abstract class ShellTask extends DefaultTask {
 
         if (detached) {
             List<String> command = new ArrayList<>();
-            if (isWindows()) {
-                command.add("cmd")
-                command.add("/C")
+            if (OsUtils.isWindows()) {
+                command.add("powershell")
+                command.add("-Command")
             } else {
                 command.add("sh")
                 command.add("-c")
@@ -49,7 +50,7 @@ abstract class ShellTask extends DefaultTask {
                 .start()
         } else {
             ExecAction exec = getExecActionFactory().newExecAction()
-            if (isWindows()) {
+            if (OsUtils.isWindows()) {
                 exec.commandLine("cmd", "/C", cmdString)
             } else {
                 exec.commandLine("sh", "-c", cmdString)
@@ -57,9 +58,5 @@ abstract class ShellTask extends DefaultTask {
             exec.workingDir(workDirString)
             exec.execute()
         }
-    }
-
-    private static boolean isWindows() {
-        return System.getProperty("os.name").startsWith("Windows")
     }
 }

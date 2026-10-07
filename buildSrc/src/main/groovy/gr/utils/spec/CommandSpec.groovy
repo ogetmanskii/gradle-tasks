@@ -1,21 +1,24 @@
 package gr.utils.spec
 
+import gr.utils.Validate
+import org.apache.commons.lang3.StringUtils
+
 import javax.annotation.Nullable
 
 class CommandSpec {
 
-    // Shell команда для запуска. Должно работать на Windows (cmd /C), macOS, Linux (sh -c)
+    // Shell команда для запуска
     String command
 
     void command(String v) {
-        command = v
+        command = Objects.requireNonNull(v)
     }
 
     // Рабочая папка для запуска команды
     String workDir
 
     void workDir(String v) {
-        workDir = v
+        workDir = Objects.requireNonNull(v)
     }
 
     // Переменные окружения
@@ -36,6 +39,7 @@ class CommandSpec {
     @Nullable Float detachAfterSeconds
 
     void detachAfterSeconds(Float v) {
+        Validate.isTrue(v != null && v > 0f, "detachAfterSeconds must be positive value")
         detachAfterSeconds = v
     }
 
@@ -50,6 +54,7 @@ class CommandSpec {
     @Nullable Float timeoutSeconds
 
     void timeoutSeconds(Float v) {
+        Validate.isTrue(v != null && v > 0f, "timeoutSeconds must be positive value")
         timeoutSeconds = v
     }
 
@@ -66,5 +71,10 @@ class CommandSpec {
             validExitCodes = new ArrayList<>()
         }
         validExitCodes.add(v)
+    }
+
+    void validate() {
+        Validate.isTrue(StringUtils.isNotBlank(command), "command must not be blank")
+        Validate.directoryExists(workDir)
     }
 }

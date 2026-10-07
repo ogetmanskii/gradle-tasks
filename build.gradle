@@ -2,17 +2,11 @@ import gr.utils.plugin.InfraPlugin
 import gr.utils.task.CleanTempTask
 import gr.utils.task.SshTask
 
-Properties props = new Properties()
-new File("$project.rootDir/local.properties").withInputStream {
-    props.load(it)
-    props.each {
-        project.ext[it.key as String] = it.value
-    }
-}
-
 apply(plugin: InfraPlugin)
 
 infra {
+    loadProperties("local.properties")
+
     service {
         name "seaweed"
         upCommand {

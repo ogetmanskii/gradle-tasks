@@ -1,5 +1,6 @@
 package gr.utils.shell
 
+import gr.utils.OsUtils
 import gr.utils.exception.InvalidExitCodeException
 import gr.utils.exception.TimeoutException
 import gr.utils.spec.CommandSpec
@@ -111,11 +112,11 @@ class ShellRunnerImpl implements ShellRunner {
     }
 
     private static ProcessBuilder buildProcessBuilder(CommandSpec spec) {
-        boolean isWindows = System.getProperty("os.name", "").toLowerCase().contains("win")
         List<String> cmd = new ArrayList<>()
 
-        if (isWindows) {
+        if (OsUtils.IS_WINDOWS) {
             cmd.add("powershell")
+            cmd.add("-Command")
             cmd.add(spec.command)
         } else {
             // setsid делает дочерний процесс лидером новой process group,
