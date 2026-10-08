@@ -14,48 +14,38 @@ abstract class ShellTask extends DefaultTask {
     @Inject
     protected abstract ExecActionFactory getExecActionFactory();
 
-    @Input abstract Object workDir
-    @Input abstract List<Object> commands = []
-    @Input abstract Object detach = false
+    @Input abstract String workDir
+    @Input abstract Map<String, String> env = [:]
+    @Input abstract String command
+    @Input abstract boolean detach = false
 
     @TaskAction
     void execute() {
-        boolean detached = TaskUtils.getBoolean(detach, false)
-        for (def cmd in commands) {
-            executeCommand(workDir, cmd, detached)
-        }
-    }
-
-    private void executeCommand(Object workDir, Object cmd, boolean detached) {
-        String cmdString = TaskUtils.getString(cmd, null)
-        if (cmdString == null) {
-            throw new IllegalStateException("cmd must not be null")
-        }
-        String workDirString = TaskUtils.getString(workDir, ".")
-
-        if (detached) {
-            List<String> command = new ArrayList<>();
+        if (detach) {
+            List<String> commands = new ArrayList<>();
             if (OsUtils.IS_WINDOWS) {
-                command.add("powershell")
-                command.add("-Command")
+                commands.add("powershell")
+                commands.add("-Command")
             } else {
-                command.add("sh")
-                command.add("-c")
+                commands.add("sh")
+                commands.add("-c")
             }
-            println("Run detached: ${cmdString}")
-            command.add(cmdString)
-            new ProcessBuilder()
-                .command(command)
-                .directory(new File(workDirString))
-                .start()
+            println("Run detached: ${commands}")
+            commands.add(command)
+            def pb = new ProcessBuilder()
+                .command(commands)
+                .directory(new File(workDir))
+            pb.environment().putAll(env)
+            pb.start()
         } else {
             ExecAction exec = getExecActionFactory().newExecAction()
             if (OsUtils.IS_WINDOWS) {
-                exec.commandLine("powershell", "-Command", cmdString)
+                exec.commandLine("powershell", "-Command", command)
             } else {
-                exec.commandLine("sh", "-c", cmdString)
+                exec.commandLine("sh", "-c", command)
             }
-            exec.workingDir(workDirString)
+            exec.environment(env)
+            exec.workingDir(workDir)
             exec.execute()
         }
     }

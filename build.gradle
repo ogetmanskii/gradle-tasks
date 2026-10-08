@@ -13,9 +13,9 @@ infra {
             workDir seaweedPath
             command "./weed mini -dir=data"
             env([
-                AWS_ACCESS_KEY_ID: "admin",
+                AWS_ACCESS_KEY_ID    : "admin",
                 AWS_SECRET_ACCESS_KEY: "secret",
-                S3_BUCKET: "s3-bucket"
+                S3_BUCKET            : "s3-bucket"
             ])
             detachAfterPhrase "All enabled components are running and ready to use"
             timeoutSeconds 60

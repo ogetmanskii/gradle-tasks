@@ -3,9 +3,9 @@ package buildlogic.plugin
 import buildlogic.utils.ClosureUtils
 import buildlogic.spec.RemoteHostSpec
 import buildlogic.spec.ServiceSpec
-import buildlogic.task.DownServiceTask
-import buildlogic.task.HealthcheckServiceTask
-import buildlogic.task.UpServiceTask
+import buildlogic.task.service.DownServiceTask
+import buildlogic.task.service.HealthcheckServiceTask
+import buildlogic.task.service.UpServiceTask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
@@ -36,7 +36,8 @@ class InfraPluginExtension {
         }
     }
 
-    static RemoteHostSpec remote(Closure closure) {
+    @SuppressWarnings('GrMethodMayBeStatic')
+    RemoteHostSpec remote(Closure closure) {
         return ClosureUtils.applyClosure(closure, new RemoteHostSpec())
     }
 

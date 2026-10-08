@@ -1,6 +1,7 @@
 package buildlogic.task
 
 import buildlogic.spec.RemoteHostSpec
+import buildlogic.utils.TaskUtils
 import buildlogic.utils.Validate
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.ChannelSftp

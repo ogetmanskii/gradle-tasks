@@ -1,6 +1,6 @@
 package buildlogic.spec
 
-import buildlogic.task.TaskUtils
+import buildlogic.utils.TaskUtils
 
 class RemoteHostSpec {
 

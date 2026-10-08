@@ -1,4 +1,4 @@
-package buildlogic.task
+package buildlogic.task.service
 
 import buildlogic.shell.ShellRunner
 import buildlogic.shell.ShellRunnerImpl

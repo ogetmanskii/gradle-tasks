@@ -1,4 +1,4 @@
-package buildlogic.task
+package buildlogic.utils
 
 import org.gradle.api.provider.Provider
 
