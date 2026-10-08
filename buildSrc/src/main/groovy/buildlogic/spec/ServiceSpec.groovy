@@ -6,42 +6,11 @@ import org.apache.commons.lang3.StringUtils
 
 class ServiceSpec {
 
-    String name
-
-    void name(String s) {
-        name = s
-    }
-
-    CommandSpec upCommand
-
-    void upCommand(@DelegatesTo(CommandSpec) Closure c) {
-        upCommand = ClosureUtils.applyClosure(c, new CommandSpec())
-    }
-
-    CommandSpec downCommand
-
-    void downCommand(@DelegatesTo(CommandSpec) Closure c) {
-        downCommand = ClosureUtils.applyClosure(c, new CommandSpec())
-    }
-
-    String imageFullPath
-
-    void imageFullPath(String s) {
-        Objects.requireNonNull(s)
-        if (OsUtils.IS_WINDOWS && s.contains("/")) {
-            throw new IllegalArgumentException("imageFullPath must not contain / symbol for Windows environments!")
-        }
-        if (!(new File(s).exists())) {
-            throw new IllegalArgumentException("File does not exist: " + s)
-        }
-        imageFullPath = s
-    }
-
-    HealthcheckSpec healthcheck
-
-    void healthcheck(@DelegatesTo(HealthcheckSpec) Closure c) {
-        healthcheck = ClosureUtils.applyClosure(c, new HealthcheckSpec())
-    }
+    private String name
+    private CommandSpec upCommand
+    private CommandSpec downCommand
+    private String imageFullPath
+    private HealthcheckSpec healthcheck
 
     void validate() {
         if (StringUtils.isBlank(name)) {
@@ -57,5 +26,55 @@ class ServiceSpec {
         if (healthcheck != null) {
             healthcheck.validate()
         }
+    }
+
+    void name(String s) {
+        name = s
+    }
+
+    void upCommand(@DelegatesTo(CommandSpec) Closure c) {
+        upCommand = ClosureUtils.applyClosure(c, new CommandSpec())
+        upCommand.validate()
+    }
+
+    void downCommand(@DelegatesTo(CommandSpec) Closure c) {
+        downCommand = ClosureUtils.applyClosure(c, new CommandSpec())
+        downCommand.validate()
+    }
+
+    void imageFullPath(String s) {
+        Objects.requireNonNull(s)
+        if (OsUtils.IS_WINDOWS && s.contains("/")) {
+            throw new IllegalArgumentException("imageFullPath must not contain / symbol for Windows environments!")
+        }
+        if (!(new File(s).exists())) {
+            throw new IllegalArgumentException("File does not exist: " + s)
+        }
+        imageFullPath = s
+    }
+
+    String getName() {
+        return name
+    }
+
+    CommandSpec getUpCommand() {
+        return upCommand
+    }
+
+    CommandSpec getDownCommand() {
+        return downCommand
+    }
+
+    String getImageFullPath() {
+        return imageFullPath
+    }
+
+    HealthcheckSpec getHealthcheck() {
+        return healthcheck
+    }
+
+    void healthcheck(@DelegatesTo(HealthcheckSpec) Closure c) {
+        healthcheck = ClosureUtils.applyClosure(c, new HealthcheckSpec())
+        healthcheck.validate()
     }
 }

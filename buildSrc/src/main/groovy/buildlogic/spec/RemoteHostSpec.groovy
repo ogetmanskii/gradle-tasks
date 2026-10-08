@@ -4,10 +4,10 @@ import buildlogic.task.TaskUtils
 
 class RemoteHostSpec {
 
-    Object host
-    Object port
-    Object user
-    Object password
+    private Object host
+    private Object port
+    private Object user
+    private Object password
 
     void host(Object v) {
         host = v

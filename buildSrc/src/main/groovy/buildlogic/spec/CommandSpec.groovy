@@ -8,21 +8,44 @@ import javax.annotation.Nullable
 class CommandSpec {
 
     // Shell команда для запуска
-    String command
+    private String command
+
+    // Рабочая папка для запуска команды
+    private String workDir
+
+    // Переменные окружения
+    @Nullable
+    private Map<String, String> env
+
+    // Если не null: отсоединиться от процесса через N секунд
+    @Nullable
+    private Float detachAfterSeconds
+
+    // Если не null: отсоединиться от процесса после появления указанной фразы в stdout
+    @Nullable
+    private String detachAfterPhrase
+
+    // Если не null: указанные коды выхода не приводят к выбрасыванию исключения.
+    // Если null: коды выхода, отличные от 0 - приводят к выбрасыванию исключения.
+    @Nullable
+    private List<Integer> validExitCodes
+
+    // Если не null: если команда не завершилась за N секунд, тогда выбросить исключение
+    @Nullable
+    private Float timeoutSeconds
+
+    void validate() {
+        Validate.isTrue(StringUtils.isNotBlank(command), "command must not be blank")
+        Validate.directoryExists(workDir)
+    }
 
     void command(String v) {
         command = Objects.requireNonNull(v)
     }
 
-    // Рабочая папка для запуска команды
-    String workDir
-
     void workDir(String v) {
         workDir = Objects.requireNonNull(v)
     }
-
-    // Переменные окружения
-    @Nullable Map<String, String> env
 
     void env(Map<String, String> env) {
         this.env = env
@@ -35,32 +58,19 @@ class CommandSpec {
         env.put(key, value)
     }
 
-    // Если не null: отсоединиться от процесса через N секунд
-    @Nullable Float detachAfterSeconds
-
     void detachAfterSeconds(Float v) {
         Validate.isTrue(v != null && v > 0f, "detachAfterSeconds must be positive value")
         detachAfterSeconds = v
     }
 
-    // Если не null: отсоединиться от процесса после появления указанной фразы в stdout
-    @Nullable String detachAfterPhrase
-
     void detachAfterPhrase(String v) {
         detachAfterPhrase = v
     }
-
-    // Если не null: если команда не завершилась за N секунд, тогда выбросить исключение
-    @Nullable Float timeoutSeconds
 
     void timeoutSeconds(Float v) {
         Validate.isTrue(v != null && v > 0f, "timeoutSeconds must be positive value")
         timeoutSeconds = v
     }
-
-    // Если не null: указанные коды выхода не приводят к выбрасыванию исключения.
-    // Если null: коды выхода, отличные от 0 - приводят к выбрасыванию исключения.
-    @Nullable List<Integer> validExitCodes
 
     void validExitCodes(List<Integer> list) {
         validExitCodes = list
@@ -73,8 +83,36 @@ class CommandSpec {
         validExitCodes.add(v)
     }
 
-    void validate() {
-        Validate.isTrue(StringUtils.isNotBlank(command), "command must not be blank")
-        Validate.directoryExists(workDir)
+    String getCommand() {
+        return command
+    }
+
+    String getWorkDir() {
+        return workDir
+    }
+
+    @Nullable
+    Map<String, String> getEnv() {
+        return env
+    }
+
+    @Nullable
+    Float getDetachAfterSeconds() {
+        return detachAfterSeconds
+    }
+
+    @Nullable
+    String getDetachAfterPhrase() {
+        return detachAfterPhrase
+    }
+
+    @Nullable
+    List<Integer> getValidExitCodes() {
+        return validExitCodes
+    }
+
+    @Nullable
+    Float getTimeoutSeconds() {
+        return timeoutSeconds
     }
 }

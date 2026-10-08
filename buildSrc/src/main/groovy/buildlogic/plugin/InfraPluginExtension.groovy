@@ -8,45 +8,30 @@ import buildlogic.task.HealthcheckServiceTask
 import buildlogic.task.UpServiceTask
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.TaskProvider
 
 import javax.inject.Inject
 
 class InfraPluginExtension {
 
-    final Project project
-
-    static final String TASK_GROUP = "infra"
+    private static final String TASK_GROUP = "infra"
+    private final Project project
+    private TaskProvider<Task> infraUpTask
+    private TaskProvider<Task> infraDownTask
+    private TaskProvider<Task> infraHealthcheckTask
 
     @Inject
     InfraPluginExtension(Project project) {
         this.project = project
-
-        project.tasks.register("infraUp", { Task task ->
-            task.group = TASK_GROUP
-            task.doLast {
-                logger.lifecycle("Infrastructure UP")
-            }
-        })
-        project.tasks.register("infraDown", { Task task ->
-            task.group = TASK_GROUP
-            task.doLast {
-                logger.lifecycle("Infrastructure DOWN")
-            }
-        })
-        project.tasks.register("infraHealthcheck", { Task task ->
-            task.group = TASK_GROUP
-            task.doLast {
-                logger.lifecycle("Infrastructure HEALTHY")
-            }
-        })
     }
 
     void loadProperties(String propertiesFile) {
+        def thisProject = project
         Properties props = new Properties()
         new File(propertiesFile).withInputStream {
             props.load(it)
             props.each {
-                project["ext"][it.key as String] = it.value
+                thisProject["ext"][it.key as String] = it.value
             }
         }
     }
@@ -64,7 +49,7 @@ class InfraPluginExtension {
             it.group = TASK_GROUP
             it.service = serviceSpec
         }
-        project.tasks.named("infraUp").configure {
+        getInfraUpTask().configure {
             it.dependsOn(upTask)
         }
 
@@ -73,7 +58,7 @@ class InfraPluginExtension {
                 it.group = TASK_GROUP
                 it.service = serviceSpec
             }
-            project.tasks.named("infraDown").configure {
+            getInfraDownTask().configure {
                 it.dependsOn(downTask)
             }
         }
@@ -83,13 +68,49 @@ class InfraPluginExtension {
                 it.service = serviceSpec
                 it.mustRunAfter(upTask)
             }
-            project.tasks.named("infraUp").configure {
+            getInfraUpTask().configure {
                 it.dependsOn(healthCheckTask)
             }
-            project.tasks.named("infraHealthcheck").configure {
+            getInfraHealthcheckTask().configure {
                 it.dependsOn(healthCheckTask)
             }
         }
         return serviceSpec
+    }
+
+    private TaskProvider<Task> getInfraUpTask() {
+        if (infraUpTask == null) {
+            infraUpTask = project.tasks.register("infraUp", { Task task ->
+                task.group = TASK_GROUP
+                task.doLast {
+                    logger.lifecycle("Infrastructure UP")
+                }
+            })
+        }
+        return infraUpTask
+    }
+
+    private TaskProvider<Task> getInfraDownTask() {
+        if (infraDownTask == null) {
+            infraDownTask = project.tasks.register("infraDown", { Task task ->
+                task.group = TASK_GROUP
+                task.doLast {
+                    logger.lifecycle("Infrastructure DOWN")
+                }
+            })
+        }
+        return infraDownTask
+    }
+
+    private TaskProvider<Task> getInfraHealthcheckTask() {
+        if (infraHealthcheckTask == null) {
+            infraHealthcheckTask = project.tasks.register("infraHealthcheck", { Task task ->
+                task.group = TASK_GROUP
+                task.doLast {
+                    logger.lifecycle("Infrastructure HEALTHY")
+                }
+            })
+        }
+        return infraHealthcheckTask
     }
 }

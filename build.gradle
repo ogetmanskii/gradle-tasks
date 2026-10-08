@@ -43,7 +43,7 @@ infra {
                 timeoutSeconds 60
             }
             intervalSeconds 2
-            timeoutSeconds 60
+            timeoutSeconds 10
         }
     }
 
