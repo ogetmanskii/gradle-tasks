@@ -21,10 +21,10 @@ abstract class SshTask extends DefaultTask {
 
     private List<Consumer<Session>> sessionActions = []
 
-    void exec(String cmd) {
-        Validate.isTrue(StringUtils.isNotBlank(cmd), "Command must not be blank")
+    void exec(String command) {
+        Validate.isTrue(StringUtils.isNotBlank(command), "command must not be blank")
         def thisTask = this
-        sessionActions.add({ session -> thisTask.runCommand(session, cmd) })
+        sessionActions.add({ session -> thisTask.runCommand(session, command) })
     }
 
     void upload(String localFile, String remoteFile, int permissions) {
@@ -32,6 +32,11 @@ abstract class SshTask extends DefaultTask {
         Validate.isTrue(StringUtils.isNotBlank(remoteFile), "remoteFile must not be blank")
         def thisTask = this
         sessionActions.add({ session -> thisTask.uploadFile(session, localFile, remoteFile, permissions) })
+    }
+
+    void doWithSession(Consumer<Session> sessionAction) {
+        Validate.isTrue(sessionAction != null, "sessionAction must not be null")
+        sessionActions.add(sessionAction)
     }
 
     @TaskAction
