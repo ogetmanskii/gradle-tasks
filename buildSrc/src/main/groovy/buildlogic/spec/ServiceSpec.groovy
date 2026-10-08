@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils
 class ServiceSpec {
 
     private String name
+    private boolean required = true
     private CommandSpec upCommand
     private CommandSpec downCommand
     private String imageFullPath
@@ -42,6 +43,10 @@ class ServiceSpec {
         downCommand.validate()
     }
 
+    void required(boolean v) {
+        required = v
+    }
+
     void imageFullPath(String s) {
         Objects.requireNonNull(s)
         if (OsUtils.IS_WINDOWS && s.contains("/")) {
@@ -71,6 +76,10 @@ class ServiceSpec {
 
     HealthcheckSpec getHealthcheck() {
         return healthcheck
+    }
+
+    boolean isRequired() {
+        return required
     }
 
     void healthcheck(@DelegatesTo(HealthcheckSpec) Closure c) {

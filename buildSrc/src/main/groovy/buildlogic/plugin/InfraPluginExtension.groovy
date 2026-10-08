@@ -49,8 +49,10 @@ class InfraPluginExtension {
             it.group = TASK_GROUP
             it.service = serviceSpec
         }
-        getInfraUpTask().configure {
-            it.dependsOn(upTask)
+        if (serviceSpec.isRequired()) {
+            getInfraUpTask().configure {
+                it.dependsOn(upTask)
+            }
         }
 
         if (serviceSpec.imageFullPath != null || serviceSpec.downCommand != null) {
@@ -68,11 +70,13 @@ class InfraPluginExtension {
                 it.service = serviceSpec
                 it.mustRunAfter(upTask)
             }
-            getInfraUpTask().configure {
-                it.dependsOn(healthCheckTask)
-            }
-            getInfraHealthcheckTask().configure {
-                it.dependsOn(healthCheckTask)
+            if (serviceSpec.isRequired()) {
+                getInfraUpTask().configure {
+                    it.dependsOn(healthCheckTask)
+                }
+                getInfraHealthcheckTask().configure {
+                    it.dependsOn(healthCheckTask)
+                }
             }
         }
         return serviceSpec
