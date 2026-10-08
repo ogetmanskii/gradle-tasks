@@ -57,12 +57,10 @@ infra {
     tasks.register('checkRemote', SshTask) {
         group = 'remote'
         remote = remoteHost
-        commands = [
-            'echo -- Docker && sudo docker ps --format "table {{.ID}}\\t{{.Names}}\\t{{.Status}}"',
-            'echo -- Disk && sudo df -h --output=source,avail,pcent',
-            'echo -- RAM && free -h',
-            'echo -- CPU && mpstat'
-        ]
+        exec 'echo -- Docker && sudo docker ps --format "table {{.ID}}\\t{{.Names}}\\t{{.Status}}"'
+        exec 'echo -- Disk && sudo df -h --output=source,avail,pcent'
+        exec 'echo -- RAM && free -h'
+        exec 'echo -- CPU && mpstat'
     }
 
     tasks.register('cleanTemp', CleanTempTask) {

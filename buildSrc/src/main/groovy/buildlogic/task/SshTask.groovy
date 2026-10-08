@@ -1,20 +1,38 @@
 package buildlogic.task
 
+import buildlogic.spec.RemoteHostSpec
+import buildlogic.utils.Validate
 import com.jcraft.jsch.ChannelExec
+import com.jcraft.jsch.ChannelSftp
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
-import buildlogic.spec.RemoteHostSpec
+import org.apache.commons.lang3.StringUtils
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
 import java.nio.charset.StandardCharsets
+import java.util.function.Consumer
 
 abstract class SshTask extends DefaultTask {
 
     @Input RemoteHostSpec remote
-    @Input List<Object> commands = []
+
+    private List<Consumer<Session>> sessionActions = []
+
+    void exec(String cmd) {
+        Validate.isTrue(StringUtils.isNotBlank(cmd), "Command must not be blank")
+        def thisTask = this
+        sessionActions.add({ session -> thisTask.runCommand(session, cmd) })
+    }
+
+    void upload(String localFile, String remoteFile, int permissions) {
+        Validate.isTrue(StringUtils.isNotBlank(localFile), "localFile must not be blank")
+        Validate.isTrue(StringUtils.isNotBlank(remoteFile), "remoteFile must not be blank")
+        def thisTask = this
+        sessionActions.add({ session -> thisTask.uploadFile(session, localFile, remoteFile, permissions) })
+    }
 
     @TaskAction
     void execute() {
@@ -30,15 +48,15 @@ abstract class SshTask extends DefaultTask {
             session.setConfig('StrictHostKeyChecking', 'no')
             session.connect(10_000)
 
-            for (def cmd in commands) {
-                runCommand(session, TaskUtils.getString(cmd, null))
+            for (def action : sessionActions) {
+                action(session)
             }
         } finally {
             session?.disconnect()
         }
     }
 
-    void runCommand(Session session, String cmd) {
+    private void runCommand(Session session, String cmd) {
         ChannelExec channel = session.openChannel('exec') as ChannelExec
         channel.setCommand(cmd)
         channel.setInputStream(null)
@@ -67,11 +85,25 @@ abstract class SshTask extends DefaultTask {
         }
     }
 
-    void logStream(InputStream is) {
+    private void logStream(InputStream is) {
         Reader reader = new InputStreamReader(is)
         String line
         while ((line = reader.readLine()) != null) {
             logger.lifecycle(line)
+        }
+    }
+
+    private void uploadFile(Session session, String localFile, String remoteFile, int permissions) {
+        File sourceFile = new File(localFile)
+        Validate.isTrue(sourceFile.isFile(), "localFile must be a file")
+        try (ChannelSftp channel = session.openChannel('sftp') as ChannelSftp) {
+            channel.connect()
+            logger.lifecycle("Upload: ${localFile} -> ${remoteFile}, permissions: ${permissions}")
+            sourceFile.withInputStream {
+                channel.put(it, remoteFile)
+            }
+            channel.chmod(permissions, remoteFile)
+            channel.disconnect()
         }
     }
 }
