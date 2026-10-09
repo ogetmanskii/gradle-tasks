@@ -5,7 +5,7 @@ import buildlogic.task.SshTask
 apply(plugin: InfraPlugin)
 
 infra {
-    loadProperties("local.properties")
+    loadProperties "local.properties"
 
     service {
         name "seaweed"

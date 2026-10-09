@@ -10,7 +10,7 @@ import org.gradle.api.tasks.TaskAction
 
 abstract class DownServiceTask extends DefaultTask {
 
-    private static ShellRunner shellRunner = ShellRunnerImpl.INSTANCE
+    private static final ShellRunner shellRunner = ShellRunnerImpl.INSTANCE
 
     @Input
     abstract ServiceSpec service
