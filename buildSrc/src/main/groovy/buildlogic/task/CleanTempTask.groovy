@@ -8,7 +8,7 @@ import java.nio.file.LinkOption
 import java.nio.file.Path
 import java.nio.file.Paths
 
-abstract class CleanTempTask extends DefaultTask {
+class CleanTempTask extends DefaultTask {
 
     @TaskAction
     void execute() {

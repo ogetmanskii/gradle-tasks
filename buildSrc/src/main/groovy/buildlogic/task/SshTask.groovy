@@ -16,7 +16,7 @@ import org.gradle.api.tasks.TaskAction
 import java.nio.charset.StandardCharsets
 import java.util.function.Consumer
 
-abstract class SshTask extends DefaultTask {
+class SshTask extends DefaultTask {
 
     @Input RemoteHostSpec remote
 
