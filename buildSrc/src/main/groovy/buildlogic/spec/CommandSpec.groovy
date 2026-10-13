@@ -4,6 +4,8 @@ import buildlogic.utils.Validate
 import org.apache.commons.lang3.StringUtils
 
 import javax.annotation.Nullable
+import java.nio.charset.Charset
+import java.nio.charset.UnsupportedCharsetException
 
 class CommandSpec {
 
@@ -16,6 +18,10 @@ class CommandSpec {
     // Переменные окружения
     @Nullable
     private Map<String, String> env
+
+    // Кодировка для чтения вывода команды
+    @Nullable
+    private String charset
 
     // Если не null: отсоединиться от процесса через N секунд
     @Nullable
@@ -45,6 +51,19 @@ class CommandSpec {
 
     void workDir(String v) {
         workDir = Objects.requireNonNull(v)
+    }
+
+    void charset(String v) {
+        Validate.isTrue(StringUtils.isNotBlank(v), "charset must not be blank")
+        try {
+            Charset.forName(v)
+        } catch (UnsupportedCharsetException e) {
+            println("This charset is unsupported. Available charsets: ")
+            for (String charset in Charset.availableCharsets().keySet()) {
+                println(" - ${charset}")
+            }
+        }
+        charset = v
     }
 
     void env(Map<String, String> env) {
@@ -94,6 +113,11 @@ class CommandSpec {
     @Nullable
     Map<String, String> getEnv() {
         return env
+    }
+
+    @Nullable
+    String getCharset() {
+        return charset
     }
 
     @Nullable

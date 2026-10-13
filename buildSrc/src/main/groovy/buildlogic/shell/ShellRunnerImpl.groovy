@@ -1,14 +1,19 @@
 package buildlogic.shell
 
-import buildlogic.utils.OsUtils
 import buildlogic.exception.InvalidExitCodeException
 import buildlogic.exception.TimeoutException
-import buildlogic.spec.CommandSpec
 import buildlogic.exception.UnhealthyException
+import buildlogic.spec.CommandSpec
 import buildlogic.spec.HealthcheckSpec
+import buildlogic.utils.OsUtils
 import org.gradle.api.logging.Logger
 
-import java.nio.charset.StandardCharsets
+import javax.annotation.Nullable
+import java.nio.ByteBuffer
+import java.nio.CharBuffer
+import java.nio.charset.Charset
+import java.nio.charset.CharsetDecoder
+import java.nio.charset.CodingErrorAction
 import java.nio.file.Paths
 import java.time.Duration
 import java.util.concurrent.BlockingQueue
@@ -17,13 +22,22 @@ import java.util.concurrent.TimeUnit
 
 class ShellRunnerImpl implements ShellRunner {
 
-    static final ShellRunner INSTANCE = new ShellRunnerImpl()
-
     // Сколько ждать после SIGTERM прежде чем слать SIGKILL.
     private static final Duration KILL_GRACE = Duration.ofSeconds(5)
 
+    private static final int NEWLINE_CHAR = Character.getNumericValue((char) '\n')
+    private static final int CAR_RETURN_CHAR = Character.getNumericValue((char) '\r')
+
+    private final Logger log
+    private final Charset charset
+
+    ShellRunnerImpl(Logger log, @Nullable Charset charset) {
+        this.log = Objects.requireNonNull(log, "logger must not be null")
+        this.charset = Objects.requireNonNullElseGet(charset, { Charset.defaultCharset() })
+    }
+
     @Override
-    Integer run(Logger log, CommandSpec spec) throws TimeoutException, InvalidExitCodeException {
+    Integer run(CommandSpec spec) throws TimeoutException, InvalidExitCodeException {
         if (spec == null || spec.command == null || spec.command.isBlank()) {
             throw new IllegalArgumentException("command must not be empty")
         }
@@ -47,8 +61,8 @@ class ShellRunnerImpl implements ShellRunner {
         BlockingQueue<String> stdoutLines = new LinkedBlockingQueue<>()
         BlockingQueue<String> stderrLines = new LinkedBlockingQueue<>()
 
-        Thread stdoutReader = startReader(log, process.getInputStream(), stdoutLines)
-        Thread stderrReader = startReader(log, process.getErrorStream(), stderrLines)
+        Thread stdoutReader = startReader(process.getInputStream(), stdoutLines)
+        Thread stderrReader = startReader(process.getErrorStream(), stderrLines)
 
         Integer exitCode = null
         try {
@@ -76,7 +90,7 @@ class ShellRunnerImpl implements ShellRunner {
     }
 
     @Override
-    boolean healthcheck(Logger log, HealthcheckSpec spec) throws UnhealthyException {
+    boolean healthcheck(HealthcheckSpec spec) throws UnhealthyException {
         if (spec == null || spec.command == null)
             throw new IllegalArgumentException("commandSpec must not be null")
         if (spec.intervalSeconds == null || spec.intervalSeconds <= 0)
@@ -89,7 +103,7 @@ class ShellRunnerImpl implements ShellRunner {
 
         while (System.nanoTime() < deadline) {
             try {
-                Integer code = run(log, spec.command)
+                Integer code = run(spec.command)
                 if (code == null || code == 0) return true
                 lastError = new InvalidExitCodeException(code, "Healthcheck exit code: " + code)
             } catch (TimeoutException | InvalidExitCodeException e) {
@@ -268,25 +282,48 @@ class ShellRunnerImpl implements ShellRunner {
         }
     }
 
-    private static Thread startReader(
-        Logger log,
-        InputStream is,
-        BlockingQueue<String> sink) {
+    private Thread startReader(InputStream is, BlockingQueue<String> sink) {
+        CharsetDecoder decoder = charset.newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT)
 
-        Thread t = new Thread(() -> {
-            try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(is, StandardCharsets.UTF_8))) {
-                String line
-                while ((line = br.readLine()) != null) {
+        Thread t = new Thread({
+            // Читаем весь поток как байты и построчно декодируем
+            try (InputStream input = is;
+                 BufferedInputStream bis = new BufferedInputStream(input)) {
+
+                ByteArrayOutputStream buf = new ByteArrayOutputStream(8192)
+                int b
+                while ((b = bis.read()) != -1) {
+                    if (b == NEWLINE_CHAR) {
+                        String line = decode(buf.toByteArray(), decoder)
+                        buf.reset()
+                        log.lifecycle(line)
+                        sink.offer(line)
+                    } else if (b != CAR_RETURN_CHAR) {
+                        buf.write(b)
+                    }
+                }
+                if (buf.size() > 0) {
+                    String line = decode(buf.toByteArray(), decoder)
                     log.lifecycle(line)
                     sink.offer(line)
                 }
             } catch (IOException ignored) {
             }
         }, "shellrunner-stdout")
-        t.setDaemon(true);
+
+        t.setDaemon(true)
         t.start()
         return t
+    }
+
+    private static String decode(byte[] bytes, CharsetDecoder decoder) {
+        if (bytes.length == 0) {
+            return ""
+        }
+        CharBuffer cb = decoder.decode(ByteBuffer.wrap(bytes))
+        return cb.toString()
     }
 
     /**

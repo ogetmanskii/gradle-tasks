@@ -1,5 +1,6 @@
 package buildlogic.task.service
 
+import buildlogic.spec.CommandSpec
 import buildlogic.utils.ProcessUtils
 import buildlogic.shell.ShellRunner
 import buildlogic.shell.ShellRunnerImpl
@@ -8,9 +9,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
-abstract class DownServiceTask extends DefaultTask {
+import java.nio.charset.Charset
 
-    private static final ShellRunner shellRunner = ShellRunnerImpl.INSTANCE
+abstract class DownServiceTask extends DefaultTask {
 
     @Input
     abstract ServiceSpec service
@@ -24,7 +25,9 @@ abstract class DownServiceTask extends DefaultTask {
             }
         }
         if (service.downCommand != null) {
-            shellRunner.run(logger, service.downCommand)
+            CommandSpec command = service.downCommand
+            ShellRunner shellRunner = new ShellRunnerImpl(logger, command.charset == null ? null : Charset.forName(command.charset))
+            shellRunner.run(command)
             logger.lifecycle("${service.name} DOWN")
             return
         } else if (service.imageFullPath != null) {

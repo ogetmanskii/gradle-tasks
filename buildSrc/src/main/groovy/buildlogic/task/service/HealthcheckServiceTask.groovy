@@ -7,9 +7,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
-abstract class HealthcheckServiceTask extends DefaultTask {
+import java.nio.charset.Charset
 
-    private static final ShellRunner shellRunner = ShellRunnerImpl.INSTANCE
+abstract class HealthcheckServiceTask extends DefaultTask {
 
     @Input
     abstract ServiceSpec service
@@ -20,7 +20,10 @@ abstract class HealthcheckServiceTask extends DefaultTask {
             logger.lifecycle("${service.name} does not have healthcheck specification")
             return
         }
-        shellRunner.healthcheck(logger, service.healthcheck)
+
+        String charset = service.healthcheck.command.charset
+        ShellRunner shellRunner = new ShellRunnerImpl(logger, charset == null ? null : Charset.forName(charset))
+        shellRunner.healthcheck(service.healthcheck)
         logger.lifecycle("${service.name} HEALTHY")
     }
 

@@ -17,6 +17,7 @@ infra {
                 AWS_SECRET_ACCESS_KEY: "secret",
                 S3_BUCKET            : "s3-bucket"
             ])
+            charset stdioCharset
             detachAfterPhrase "All enabled components are running and ready to use"
             timeoutSeconds 60
         }
@@ -28,18 +29,21 @@ infra {
         upCommand {
             workDir postgresPath
             command "./bin/pg_ctl start -D data -l postgres.txt"
+            charset stdioCharset
             timeoutSeconds 60
         }
         imageFullPath postgresExe
         downCommand {
             workDir postgresPath
             command "./bin/pg_ctl stop -D data"
+            charset stdioCharset
             timeoutSeconds 60
         }
         healthcheck {
             command {
                 workDir postgresPath
                 command "./bin/pg_isready -h localhost -d postgres -U postgres"
+                charset stdioCharset
                 timeoutSeconds 60
             }
             intervalSeconds 2
