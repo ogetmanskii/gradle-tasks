@@ -54,7 +54,9 @@ class CommandSpec {
     }
 
     void charset(String v) {
-        Validate.isTrue(StringUtils.isNotBlank(v), "charset must not be blank")
+        if (StringUtils.isBlank(v)) {
+            return
+        }
         try {
             Charset.forName(v)
         } catch (UnsupportedCharsetException e) {
