@@ -25,9 +25,6 @@ class ShellRunnerImpl implements ShellRunner {
     // Сколько ждать после SIGTERM прежде чем слать SIGKILL.
     private static final Duration KILL_GRACE = Duration.ofSeconds(5)
 
-    private static final int NEWLINE_CHAR = Character.getNumericValue((char) '\n')
-    private static final int CAR_RETURN_CHAR = Character.getNumericValue((char) '\r')
-
     private final Logger log
     private final Charset charset
 
@@ -294,13 +291,15 @@ class ShellRunnerImpl implements ShellRunner {
 
                 ByteArrayOutputStream buf = new ByteArrayOutputStream(8192)
                 int b
+                final char n = '\n'
+                final char r = '\r'
                 while ((b = bis.read()) != -1) {
-                    if (b == NEWLINE_CHAR) {
+                    if (b == (int) n) {
                         String line = decode(buf.toByteArray(), decoder)
                         buf.reset()
                         log.lifecycle(line)
                         sink.offer(line)
-                    } else if (b != CAR_RETURN_CHAR) {
+                    } else if (b != r) {
                         buf.write(b)
                     }
                 }

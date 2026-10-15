@@ -17,7 +17,7 @@ infra {
                 AWS_SECRET_ACCESS_KEY: "secret",
                 S3_BUCKET            : "s3-bucket"
             ])
-            charset stdioCharset
+            charset "utf-8"
             detachAfterPhrase "All enabled components are running and ready to use"
             timeoutSeconds 60
         }
